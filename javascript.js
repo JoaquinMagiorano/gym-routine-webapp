@@ -1,4 +1,4 @@
-// Configuración de rutinas por día
+// Rutina default
 const defaultRoutines = {
     0: { // Domingo
         name: "Descanso",
@@ -80,15 +80,13 @@ let routines = {};
 let isEditMode = false;
 let currentDay = new Date().getDay();
 
-// Inicializar la aplicación
 function initApp() {
     loadRoutines();
-    resetAllExercisesToIncomplete(); // Resetear todos los ejercicios
+    resetAllExercisesToIncomplete();
     displayCurrentDay();
     updateStats();
 }
 
-// Cargar rutinas desde localStorage o usar las por defecto
 function loadRoutines() {
     const saved = localStorage.getItem('gymRoutines');
     if (saved) {
@@ -99,32 +97,26 @@ function loadRoutines() {
     }
 }
 
-// Resetear todos los ejercicios como no completados
 function resetAllExercisesToIncomplete() {
     console.log('🔄 Reseteando todos los ejercicios a no completados...');
     
-    // Recorrer todas las rutinas
     Object.keys(routines).forEach(dayKey => {
         if (routines[dayKey].exercises && routines[dayKey].exercises.length > 0) {
-            // Resetear cada ejercicio a completed: false
             routines[dayKey].exercises.forEach(exercise => {
                 exercise.completed = false;
             });
         }
     });
     
-    // Guardar los cambios
     saveRoutines();
     
     console.log('✅ Todos los ejercicios reseteados correctamente');
 }
 
-// Guardar rutinas en localStorage
 function saveRoutines() {
     localStorage.setItem('gymRoutines', JSON.stringify(routines));
 }
 
-// Mostrar el día actual
 function displayCurrentDay() {
     const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
     const today = new Date();
@@ -144,7 +136,6 @@ function displayCurrentDay() {
     displayRoutine();
 }
 
-// Mostrar la rutina del día
 function displayRoutine() {
     const routine = routines[currentDay];
     const content = document.getElementById('routineContent');
@@ -180,7 +171,6 @@ function displayRoutine() {
     updateProgress();
 }
 
-// Crear HTML para un ejercicio
 function createExerciseHTML(exercise, index) {
     const editControls = isEditMode ? `
         <div class="mt-2">
@@ -212,7 +202,6 @@ function createExerciseHTML(exercise, index) {
     `;
 }
 
-// Toggle completado de ejercicio
 function toggleExercise(index) {
     routines[currentDay].exercises[index].completed = !routines[currentDay].exercises[index].completed;
     saveRoutines();
@@ -220,7 +209,6 @@ function toggleExercise(index) {
     updateStats();
 }
 
-// Actualizar progreso y estadísticas
 function updateProgress() {
     const routine = routines[currentDay];
     if (routine.exercises.length === 0) {
@@ -235,7 +223,6 @@ function updateProgress() {
     document.getElementById('progressFill').style.width = percentage + '%';
 }
 
-// Actualizar estadísticas
 function updateStats() {
     const routine = routines[currentDay];
     const total = routine.exercises.length;
@@ -247,7 +234,6 @@ function updateStats() {
     document.getElementById('todayProgress').textContent = percentage + '%';
 }
 
-// Toggle modo edición
 function toggleEditMode() {
     isEditMode = !isEditMode;
     const editBtn = document.getElementById('editBtn');
@@ -263,7 +249,6 @@ function toggleEditMode() {
     displayRoutine();
 }
 
-// Agregar ejercicio
 function addExercise() {
     const name = prompt("Nombre del ejercicio:");
     if (!name) return;
@@ -282,7 +267,6 @@ function addExercise() {
     updateStats();
 }
 
-// Eliminar ejercicio
 function removeExercise(index) {
     if (confirm("¿Estás seguro de que quieres eliminar este ejercicio?")) {
         routines[currentDay].exercises.splice(index, 1);
@@ -292,7 +276,6 @@ function removeExercise(index) {
     }
 }
 
-// Editar ejercicio
 function editExercise(index) {
     const exercise = routines[currentDay].exercises[index];
     
@@ -309,5 +292,4 @@ function editExercise(index) {
     displayRoutine();
 }
 
-// Inicializar cuando se carga la página
 document.addEventListener('DOMContentLoaded', initApp);
