@@ -1,1 +1,3 @@
-# Webapp de uso personal para seguir mi rutina de gimnasio
+# Webapp de uso personal para seguir una rutina de gimnasio
+- Se pueden modificar, añadir y borrar ejercicios.
+- Almacena las rutinas modificadas localmente.
