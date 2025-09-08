@@ -83,6 +83,7 @@ let currentDay = new Date().getDay();
 // Inicializar la aplicación
 function initApp() {
     loadRoutines();
+    resetAllExercisesToIncomplete(); // Resetear todos los ejercicios
     displayCurrentDay();
     updateStats();
 }
@@ -96,6 +97,26 @@ function loadRoutines() {
         routines = JSON.parse(JSON.stringify(defaultRoutines));
         saveRoutines();
     }
+}
+
+// Resetear todos los ejercicios como no completados
+function resetAllExercisesToIncomplete() {
+    console.log('🔄 Reseteando todos los ejercicios a no completados...');
+    
+    // Recorrer todas las rutinas
+    Object.keys(routines).forEach(dayKey => {
+        if (routines[dayKey].exercises && routines[dayKey].exercises.length > 0) {
+            // Resetear cada ejercicio a completed: false
+            routines[dayKey].exercises.forEach(exercise => {
+                exercise.completed = false;
+            });
+        }
+    });
+    
+    // Guardar los cambios
+    saveRoutines();
+    
+    console.log('✅ Todos los ejercicios reseteados correctamente');
 }
 
 // Guardar rutinas en localStorage
