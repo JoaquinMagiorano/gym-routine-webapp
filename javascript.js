@@ -1,39 +1,46 @@
-// Rutinas default
 const defaultBaseRoutines = {
-    1: { // Rutina 1: Lunes y Jueves
+    1: { 
         name: "Pecho, Espalda y Bíceps",
         exercises: [
-            { name: "Pecho: Press plano", sets: "3x8 - 15kg", completed: false },
-            { name: "Pecho: Press inclinado", sets: "3x10 - 8kg", completed: false },
-            { name: "Pecho: Cruces de polea", sets: "3x10 - 10kg", completed: false },
-            { name: "Espalda: Remo con agarre amplio", sets: "3x10 - 25kg", completed: false },
-            { name: "Espalda: Remo con agarre cerrado", sets: "3x10 - 40kg", completed: false },
-            { name: "Espalda: Tirón de polea al pecho con agarre ancho", sets: "3x10 - 40kg", completed: false },
-            { name: "Bíceps: Curl con barra W", sets: "3x10 - 20kg", completed: false },
-            { name: "Bíceps: Curl con barra H", sets: "3x10 - 5kg", completed: false },
-            { name: "Bíceps: Drag curl", sets: "3x10 - 15kg", completed: false },
-            { name: "Antebrazos", sets: "3x15 - 20kg", completed: false },
+            { name: "Pecho: Press plano", sets: "3x10 - 20kg", completed: false },
+            { name: "Pecho: Press inclinado", sets: "3x10 - 12.5kg", completed: false },
+            { name: "Pecho: Cruces de polea", sets: "3x10 - 25kg", completed: false },
+            { name: "Espalda: Remo con agarre amplio", sets: "3x10 - 40kg", completed: false },
+            { name: "Espalda: Remo con agarre cerrado", sets: "3x10 - 50kg", completed: false },
+            { name: "Espalda: Lat Pulldown unilateral", sets: "3x10 - 20kg", completed: false },
+            { name: "Bíceps: Preacher curl", sets: "3x10 - 20kg", completed: false },
+            { name: "Bíceps: Rope hammer curl", sets: "3x10 - 35kg", completed: false },
+            { name: "Bíceps: Drag curl", sets: "3x10 - 20kg", completed: false },
+            { name: "Antebrazos", sets: "3x15 - 25kg", completed: false },
         ]
     },
-    2: { // Rutina 2: Martes y Viernes
+    2: {
         name: "Piernas, Hombros y Tríceps",
         exercises: [
-            { name: "Hombros: Press militar", sets: "3x10 - 20kg", completed: false },
-            { name: "Hombros: Face pulls", sets: "3x10 - 25kg", completed: false },
-            { name: "Hombros: Elevaciones laterales con polea", sets: "3x10 - 10kg", completed: false },
-            { name: "Antebrazos", sets: "3x15 - 20kg", completed: false },
-            { name: "Tríceps: Tirón de polea", sets: "3x10 - 25kg", completed: false },
-            { name: "Tríceps: Extensión inclinada por encima (polea alta)", sets: "3x10 - 30kg", completed: false },
-            { name: "Tríceps: Extensión unilateral por encima (polea baja)", sets: "3x10 - 10kg", completed: false },
-            { name: "Piernas: Prensa", sets: "3x10 - 40kg", completed: false },
-            { name: "Piernas: Maquina de isquios", sets: "3x10 - 30kg", completed: false },
-            { name: "Piernas: Maquina de cuádriceps", sets: "3x10 - 30kg", completed: false },
-            { name: "Gemelos", sets: "3x20 - 30kg", completed: false },
+            { name: "Hombros: Press militar", sets: "3x10 - 32kg", completed: false },
+            { name: "Hombros: Face pulls", sets: "3x10 - 40kg", completed: false },
+            { name: "Hombros: Elevaciones laterales con polea", sets: "3x10 - 15kg", completed: false },
+            { name: "Tríceps: Pushdown", sets: "3x10 - 45kg", completed: false },
+            { name: "Tríceps: Extensión inclinada por encima (polea alta)", sets: "3x10 - 40kg", completed: false },
+            { name: "Tríceps: Extensión unilateral por encima (polea baja)", sets: "3x10 - 15kg", completed: false },
+            { name: "Piernas: Prensa", sets: "3x10 - 55kg", completed: false },
+            { name: "Piernas: Maquina de isquios", sets: "3x10 - 45kg", completed: false },
+            { name: "Piernas: Maquina de cuádriceps", sets: "3x10 - 45kg", completed: false },
+            { name: "Gemelos", sets: "3x20 - 40kg", completed: false },
+            { name: "Antebrazos", sets: "3x15 - 25kg", completed: false },
+        ]
+    },
+    3: {
+        name: "Rutina Opcional - Core",
+        exercises: [
+            { name: "Plancha", sets: "3x30seg", completed: false },
+            { name: "Elevaciones de piernas", sets: "3x10", completed: false },
+            { name: "Russian twists", sets: "3x20", completed: false },
+            { name: "Superman", sets: "3x15", completed: false },
         ]
     }
 };
 
-// Mapeo de días a rutinas
 const dayToRoutineMap = {
     0: null, // Domingo - Descanso
     1: 1,    // Lunes - Rutina 1
@@ -57,6 +64,7 @@ function initApp() {
     loadRoutines();
     resetAllExercisesToIncomplete();
     displayCurrentDay();
+    displayOptionalRoutine();
     updateStats();
 }
 
@@ -65,8 +73,14 @@ function loadRoutines() {
     if (saved) {
         baseRoutines = JSON.parse(saved);
         console.log('📁 Rutinas cargadas desde localStorage');
+        
+        if (!baseRoutines[3]) {
+            console.log('🔄 Agregando rutina opcional...');
+            baseRoutines[3] = JSON.parse(JSON.stringify(defaultBaseRoutines[3]));
+            saveRoutines();
+            console.log('✅ Rutina opcional agregada');
+        }
     } else {
-        // Primera vez - cargar rutinas por defecto
         baseRoutines = JSON.parse(JSON.stringify(defaultBaseRoutines));
         saveRoutines();
         console.log('🔄 Rutinas por defecto inicializadas');
@@ -76,7 +90,6 @@ function loadRoutines() {
 function resetAllExercisesToIncomplete() {
     console.log('🔄 Reseteando todos los ejercicios a no completados...');
     
-    // Solo resetear las rutinas base (1 y 2)
     Object.keys(baseRoutines).forEach(routineKey => {
         if (baseRoutines[routineKey].exercises && baseRoutines[routineKey].exercises.length > 0) {
             baseRoutines[routineKey].exercises.forEach(exercise => {
@@ -111,9 +124,7 @@ function displayCurrentDay() {
     const routineNumber = dayToRoutineMap[currentDay];
     
     let titleText = `${days[currentDay]} - ${currentRoutine.name}`;
-    if (routineNumber !== null) {
-        titleText += ` (Rutina ${routineNumber})`;
-    }
+    
 
     document.getElementById('dayTitle').textContent = titleText;
     
@@ -126,6 +137,7 @@ function displayCurrentDay() {
         });
 
     displayRoutine();
+    displayOptionalRoutine();
 }
 
 function displayRoutine() {
@@ -160,7 +172,6 @@ function displayRoutine() {
         content.innerHTML = html;
     }
     
-    // Mostrar información adicional en modo edición
     if (isEditMode && dayToRoutineMap[currentDay] !== null) {
         const routineNumber = dayToRoutineMap[currentDay];
         const sharedDays = Object.keys(dayToRoutineMap)
@@ -178,14 +189,14 @@ function displayRoutine() {
     updateProgress();
 }
 
-function createExerciseHTML(exercise, index) {
-    const canEdit = isEditMode && dayToRoutineMap[currentDay] !== null;
+function createExerciseHTML(exercise, index, isOptional = false) {
+    const canEdit = isEditMode && (isOptional || dayToRoutineMap[currentDay] !== null);
     const editControls = canEdit ? `
         <div class="mt-2">
-            <button class="btn btn-sm btn-outline-danger" onclick="removeExercise(${index})">
+            <button class="btn btn-sm btn-outline-danger" onclick="removeExercise(${index}, ${isOptional})">
                 <i class="bi bi-trash"></i>
             </button>
-            <button class="btn btn-sm btn-outline-warning ms-2" onclick="editExercise(${index})">
+            <button class="btn btn-sm btn-outline-warning ms-2" onclick="editExercise(${index}, ${isOptional})">
                 <i class="bi bi-pencil"></i>
             </button>
         </div>
@@ -197,7 +208,7 @@ function createExerciseHTML(exercise, index) {
                 <input type="checkbox" 
                         class="form-check-input exercise-checkbox" 
                         ${exercise.completed ? 'checked' : ''} 
-                        onchange="toggleExercise(${index})"
+                        onchange="toggleExercise(${index}, ${isOptional})"
                         ${isEditMode ? 'disabled' : ''}>
                 <div class="flex-grow-1">
                     <h6 class="mb-1 ${exercise.completed ? 'text-decoration-line-through' : ''}">${exercise.name}</h6>
@@ -210,13 +221,67 @@ function createExerciseHTML(exercise, index) {
     `;
 }
 
-function toggleExercise(index) {
-    const routineNumber = dayToRoutineMap[currentDay];
+function displayOptionalRoutine() {
+    const optionalDiv = document.getElementById('optionalRoutine');
+    
+    if (!optionalDiv) {
+        console.warn('⚠️ No se encontró el div con id="optionalRoutine"');
+        return;
+    }
+    
+    if (currentDay === 3) {
+        optionalDiv.innerHTML = '';
+        return;
+    }
+    
+    if (!baseRoutines[3]) {
+        console.warn('⚠️ Rutina opcional no encontrada, recargando...');
+        baseRoutines[3] = JSON.parse(JSON.stringify(defaultBaseRoutines[3]));
+        saveRoutines();
+    }
+
+    const optionalRoutine = baseRoutines[3];
+
+    let html = `
+        <div class="mt-4 mb-3">
+            <h5 class="text-white-50">
+                <i class="bi bi-star me-2"></i>
+                ${optionalRoutine.name}
+            </h5>
+        </div>
+    `;
+
+    optionalRoutine.exercises.forEach((exercise, index) => {
+        html += createExerciseHTML(exercise, index, true);
+    });
+    
+    if (isEditMode) {
+        html += `
+            <div class="text-center mt-3">
+                <button class="btn btn-sm btn-outline-success" onclick="addExercise(true)">
+                    <i class="bi bi-plus-circle me-2"></i>Agregar ejercicio opcional
+                </button>
+            </div>
+        `;
+    }
+    
+    optionalDiv.innerHTML = html;
+    console.log('✅ Rutina opcional cargada');
+}
+
+function toggleExercise(index, isOptional = false) {
+    const routineNumber = isOptional ? 3 : dayToRoutineMap[currentDay];
     if (routineNumber === null) return;
     
     baseRoutines[routineNumber].exercises[index].completed = !baseRoutines[routineNumber].exercises[index].completed;
     saveRoutines();
-    displayRoutine();
+    
+    if (isOptional) {
+        displayOptionalRoutine();
+    } else {
+        displayRoutine();
+    }
+    
     updateStats();
     
     console.log(`✅ Ejercicio ${index + 1} de la rutina ${routineNumber} ${baseRoutines[routineNumber].exercises[index].completed ? 'completado' : 'desmarcado'}`);
@@ -224,22 +289,33 @@ function toggleExercise(index) {
 
 function updateProgress() {
     const routine = getCurrentRoutine();
-    if (routine.exercises.length === 0) {
+    let total = routine.exercises.length;
+    let completed = routine.exercises.filter(ex => ex.completed).length;
+    
+    if (currentDay !== 3 && baseRoutines[3]) {
+        total += baseRoutines[3].exercises.length;
+        completed += baseRoutines[3].exercises.filter(ex => ex.completed).length;
+    }
+    
+    if (total === 0) {
         document.getElementById('progressFill').style.width = '0%';
         return;
     }
 
-    const completed = routine.exercises.filter(ex => ex.completed).length;
-    const total = routine.exercises.length;
     const percentage = Math.round((completed / total) * 100);
-
     document.getElementById('progressFill').style.width = percentage + '%';
 }
 
 function updateStats() {
     const routine = getCurrentRoutine();
-    const total = routine.exercises.length;
-    const completed = routine.exercises.filter(ex => ex.completed).length;
+    let total = routine.exercises.length;
+    let completed = routine.exercises.filter(ex => ex.completed).length;
+    
+    if (currentDay !== 3 && baseRoutines[3]) {
+        total += baseRoutines[3].exercises.length;
+        completed += baseRoutines[3].exercises.filter(ex => ex.completed).length;
+    }
+    
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
     document.getElementById('todayTotal').textContent = total;
@@ -250,7 +326,6 @@ function updateStats() {
 function toggleEditMode() {
     const routineNumber = dayToRoutineMap[currentDay];
     
-    // No permitir modo edición en días de descanso
     if (routineNumber === null) {
         alert('No se puede editar en días de descanso');
         return;
@@ -268,11 +343,12 @@ function toggleEditMode() {
     }
     
     displayRoutine();
+    displayOptionalRoutine();
 }
 
-function addExercise() {
-    const routineNumber = dayToRoutineMap[currentDay];
-    if (routineNumber === null) return;
+function addExercise(isOptional = false) {
+    const routineNumber = isOptional ? 3 : dayToRoutineMap[currentDay];
+    if (routineNumber === null && !isOptional) return;
     
     const name = prompt("Nombre del ejercicio:");
     if (!name) return;
@@ -287,31 +363,47 @@ function addExercise() {
     });
 
     saveRoutines();
-    displayRoutine();
+    
+    if (isOptional) {
+        displayOptionalRoutine();
+    } else {
+        displayRoutine();
+    }
+    
     updateStats();
     
     console.log(`➕ Ejercicio "${name}" agregado a la rutina ${routineNumber}`);
 }
 
-function removeExercise(index) {
-    const routineNumber = dayToRoutineMap[currentDay];
-    if (routineNumber === null) return;
+function removeExercise(index, isOptional = false) {
+    const routineNumber = isOptional ? 3 : dayToRoutineMap[currentDay];
+    if (routineNumber === null && !isOptional) return;
     
     const exerciseName = baseRoutines[routineNumber].exercises[index].name;
     
-    if (confirm(`¿Estás seguro de que quieres eliminar "${exerciseName}"?\n\nEste ejercicio se eliminará de todos los días que usan la Rutina ${routineNumber}.`)) {
+    const confirmMessage = isOptional 
+        ? `¿Estás seguro de que quieres eliminar "${exerciseName}"?\n\nEste ejercicio se eliminará de la rutina opcional.`
+        : `¿Estás seguro de que quieres eliminar "${exerciseName}"?\n\nEste ejercicio se eliminará de todos los días que usan la Rutina ${routineNumber}.`;
+    
+    if (confirm(confirmMessage)) {
         baseRoutines[routineNumber].exercises.splice(index, 1);
         saveRoutines();
-        displayRoutine();
+        
+        if (isOptional) {
+            displayOptionalRoutine();
+        } else {
+            displayRoutine();
+        }
+        
         updateStats();
         
         console.log(`🗑️ Ejercicio "${exerciseName}" eliminado de la rutina ${routineNumber}`);
     }
 }
 
-function editExercise(index) {
-    const routineNumber = dayToRoutineMap[currentDay];
-    if (routineNumber === null) return;
+function editExercise(index, isOptional = false) {
+    const routineNumber = isOptional ? 3 : dayToRoutineMap[currentDay];
+    if (routineNumber === null && !isOptional) return;
     
     const exercise = baseRoutines[routineNumber].exercises[index];
     
@@ -326,12 +418,16 @@ function editExercise(index) {
     baseRoutines[routineNumber].exercises[index].sets = newSets || exercise.sets;
 
     saveRoutines();
-    displayRoutine();
+    
+    if (isOptional) {
+        displayOptionalRoutine();
+    } else {
+        displayRoutine();
+    }
     
     console.log(`✏️ Ejercicio "${oldName}" editado en la rutina ${routineNumber}`);
 }
 
-// Función de utilidad para debugging - mostrar el estado actual
 function debugRoutines() {
     console.log('🔍 Estado actual de las rutinas:');
     console.log('Base Routines:', baseRoutines);
