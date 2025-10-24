@@ -5,11 +5,11 @@ const defaultBaseRoutines = {
             { name: "Pecho: Press plano", sets: "3x10 - 20kg", completed: false },
             { name: "Pecho: Press inclinado", sets: "3x10 - 12.5kg", completed: false },
             { name: "Pecho: Cruces de polea", sets: "3x10 - 25kg", completed: false },
-            { name: "Espalda: Remo con agarre amplio", sets: "3x10 - 40kg", completed: false },
+            { name: "Espalda: Remo con pecho apoyado", sets: "3x10 - 35kg", completed: false },
             { name: "Espalda: Remo con agarre cerrado", sets: "3x10 - 50kg", completed: false },
             { name: "Espalda: Lat Pulldown unilateral", sets: "3x10 - 20kg", completed: false },
-            { name: "Bíceps: Preacher curl", sets: "3x10 - 20kg", completed: false },
-            { name: "Bíceps: Rope hammer curl", sets: "3x10 - 35kg", completed: false },
+            { name: "Bíceps: Curl con barra W", sets: "3x10 - 25kg", completed: false },
+            { name: "Bíceps: Rope hammer curl", sets: "3x10 - 40kg", completed: false },
             { name: "Bíceps: Drag curl", sets: "3x10 - 20kg", completed: false },
             { name: "Antebrazos", sets: "3x15 - 25kg", completed: false },
         ]
@@ -26,7 +26,7 @@ const defaultBaseRoutines = {
             { name: "Piernas: Prensa", sets: "3x10 - 55kg", completed: false },
             { name: "Piernas: Maquina de isquios", sets: "3x10 - 45kg", completed: false },
             { name: "Piernas: Maquina de cuádriceps", sets: "3x10 - 45kg", completed: false },
-            { name: "Gemelos", sets: "3x20 - 40kg", completed: false },
+            { name: "Gemelos", sets: "3x20 - 50kg", completed: false },
             { name: "Antebrazos", sets: "3x15 - 25kg", completed: false },
         ]
     },
@@ -59,6 +59,12 @@ const restDayInfo = {
 let baseRoutines = {};
 let isEditMode = false;
 let currentDay = new Date().getDay();
+let draggedElement = null;
+let draggedIndex = null;
+let draggedIsOptional = false;
+let dragStartY = 0;
+let currentY = 0;
+let initialY = 0;
 
 function initApp() {
     loadRoutines();
@@ -72,24 +78,21 @@ function loadRoutines() {
     const saved = localStorage.getItem('gymBaseRoutines');
     if (saved) {
         baseRoutines = JSON.parse(saved);
-        console.log('📁 Rutinas cargadas desde localStorage');
+        console.log('Rutinas cargadas desde localStorage');
         
         if (!baseRoutines[3]) {
-            console.log('🔄 Agregando rutina opcional...');
             baseRoutines[3] = JSON.parse(JSON.stringify(defaultBaseRoutines[3]));
             saveRoutines();
-            console.log('✅ Rutina opcional agregada');
+            console.log('Rutina opcional agregada');
         }
     } else {
         baseRoutines = JSON.parse(JSON.stringify(defaultBaseRoutines));
         saveRoutines();
-        console.log('🔄 Rutinas por defecto inicializadas');
+        console.log('Rutinas por defecto cargadas');
     }
 }
 
 function resetAllExercisesToIncomplete() {
-    console.log('🔄 Reseteando todos los ejercicios a no completados...');
-    
     Object.keys(baseRoutines).forEach(routineKey => {
         if (baseRoutines[routineKey].exercises && baseRoutines[routineKey].exercises.length > 0) {
             baseRoutines[routineKey].exercises.forEach(exercise => {
@@ -99,12 +102,12 @@ function resetAllExercisesToIncomplete() {
     });
     
     saveRoutines();
-    console.log('✅ Todos los ejercicios reseteados correctamente');
+    console.log('Todos los ejercicios reseteados correctamente');
 }
 
 function saveRoutines() {
     localStorage.setItem('gymBaseRoutines', JSON.stringify(baseRoutines));
-    console.log('💾 Rutinas guardadas en localStorage');
+    console.log('Rutinas guardadas en localStorage');
 }
 
 function getCurrentRoutine() {
@@ -125,7 +128,6 @@ function displayCurrentDay() {
     
     let titleText = `${days[currentDay]} - ${currentRoutine.name}`;
     
-
     document.getElementById('dayTitle').textContent = titleText;
     
     document.getElementById('dayDate').textContent = 
@@ -191,6 +193,16 @@ function displayRoutine() {
 
 function createExerciseHTML(exercise, index, isOptional = false) {
     const canEdit = isEditMode && (isOptional || dayToRoutineMap[currentDay] !== null);
+    
+    const dragHandle = canEdit ? `
+        <button class="btn-drag-handle" 
+                onmousedown="startDrag(event, ${index}, ${isOptional})"
+                ontouchstart="startDrag(event, ${index}, ${isOptional})"
+                title="Arrastrar para reordenar">
+            <i class="bi bi-grip-vertical"></i>
+        </button>
+    ` : '';
+    
     const editControls = canEdit ? `
         <div class="mt-2">
             <button class="btn btn-sm btn-outline-danger" onclick="removeExercise(${index}, ${isOptional})">
@@ -203,7 +215,11 @@ function createExerciseHTML(exercise, index, isOptional = false) {
     ` : '';
 
     return `
-        <div class="exercise-item ${exercise.completed ? 'completed' : ''}" ${canEdit ? 'style="border: 2px dashed #ffc107; background: rgba(255, 193, 7, 0.1);"' : ''}>
+        <div class="exercise-item ${exercise.completed ? 'completed' : ''}" 
+             data-index="${index}" 
+             data-optional="${isOptional}"
+             ${canEdit ? 'style="border: 2px dashed #ffc107; background: rgba(255, 193, 7, 0.1);"' : ''}>
+            ${dragHandle}
             <div class="d-flex align-items-center">
                 <input type="checkbox" 
                         class="form-check-input exercise-checkbox" 
@@ -225,7 +241,7 @@ function displayOptionalRoutine() {
     const optionalDiv = document.getElementById('optionalRoutine');
     
     if (!optionalDiv) {
-        console.warn('⚠️ No se encontró el div con id="optionalRoutine"');
+        console.warn('No se encontró el div con id="optionalRoutine"');
         return;
     }
     
@@ -235,7 +251,7 @@ function displayOptionalRoutine() {
     }
     
     if (!baseRoutines[3]) {
-        console.warn('⚠️ Rutina opcional no encontrada, recargando...');
+        console.warn('Rutina opcional no encontrada');
         baseRoutines[3] = JSON.parse(JSON.stringify(defaultBaseRoutines[3]));
         saveRoutines();
     }
@@ -266,7 +282,151 @@ function displayOptionalRoutine() {
     }
     
     optionalDiv.innerHTML = html;
-    console.log('✅ Rutina opcional cargada');
+    console.log('Rutina opcional cargada');
+}
+
+function startDrag(event, index, isOptional) {
+    event.preventDefault();
+    
+    draggedIndex = index;
+    draggedIsOptional = isOptional;
+    
+    const target = event.target.closest('.btn-drag-handle');
+    draggedElement = target.closest('.exercise-item');
+    
+    const rect = draggedElement.getBoundingClientRect();
+    
+    if (event.type === 'mousedown') {
+        dragStartY = event.clientY;
+        initialY = rect.top;
+    } else if (event.type === 'touchstart') {
+        dragStartY = event.touches[0].clientY;
+        initialY = rect.top;
+    }
+    
+    currentY = 0;
+    
+    draggedElement.classList.add('dragging'); // Agrega clase de arrastre
+    draggedElement.style.zIndex = '1000';
+    
+    if (event.type === 'mousedown') {
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', endDrag);
+    } else if (event.type === 'touchstart') {
+        document.addEventListener('touchmove', drag);
+        document.addEventListener('touchend', endDrag);
+    }
+    
+    console.log(`Iniciando arrastre del ejercicio ${index} (Opcional: ${isOptional})`);
+}
+
+function drag(event) {
+    if (!draggedElement) return;
+    
+    event.preventDefault();
+    
+    const clientY = event.type === 'mousemove' ? event.clientY : event.touches[0].clientY;
+    currentY = clientY - dragStartY;
+    
+    draggedElement.style.transform = `translateY(${currentY}px)`; // Mover el elemento arrastrado
+    
+    const container = draggedIsOptional ? 
+        document.getElementById('optionalRoutine') : 
+        document.getElementById('routineContent');
+    
+    const allItems = Array.from(container.querySelectorAll('.exercise-item'))
+        .filter(item => item !== draggedElement);
+    
+    const draggedRect = draggedElement.getBoundingClientRect();
+    const draggedCenter = draggedRect.top + draggedRect.height / 2;
+    
+    let newIndex = draggedIndex;
+    
+    allItems.forEach((item, i) => {
+        const itemRect = item.getBoundingClientRect();
+        const itemCenter = itemRect.top + itemRect.height / 2;
+        const actualIndex = parseInt(item.dataset.index);
+        
+        item.style.transform = '';
+        item.classList.remove('drag-shift-down', 'drag-shift-up');
+        
+        if (draggedCenter < itemCenter && draggedIndex > actualIndex) { // Si el elemento arrastrado está por encima de este item
+            item.style.transform = `translateY(${draggedRect.height + 10}px)`;
+            item.classList.add('drag-shift-down');
+            newIndex = Math.min(newIndex, actualIndex);
+        } else if (draggedCenter > itemCenter && draggedIndex < actualIndex) { // Si el elemento arrastrado está por debajo de este item
+            item.style.transform = `translateY(-${draggedRect.height + 10}px)`;
+            item.classList.add('drag-shift-up');
+            newIndex = Math.max(newIndex, actualIndex);
+        }
+    });
+}
+
+function endDrag(event) {
+    if (!draggedElement) return;
+    
+    document.removeEventListener('mousemove', drag);
+    document.removeEventListener('mouseup', endDrag);
+    document.removeEventListener('touchmove', drag);
+    document.removeEventListener('touchend', endDrag);
+    
+    const container = draggedIsOptional ? 
+        document.getElementById('optionalRoutine') : 
+        document.getElementById('routineContent');
+    
+    const allItems = Array.from(container.querySelectorAll('.exercise-item'))
+        .filter(item => item !== draggedElement);
+    
+    const draggedRect = draggedElement.getBoundingClientRect();
+    const draggedCenter = draggedRect.top + draggedRect.height / 2;
+    
+    let newIndex = draggedIndex;
+    
+    allItems.forEach(item => {
+        const itemRect = item.getBoundingClientRect();
+        const itemCenter = itemRect.top + itemRect.height / 2;
+        const actualIndex = parseInt(item.dataset.index);
+        
+        if (draggedCenter < itemCenter && draggedIndex > actualIndex) {
+            newIndex = Math.min(newIndex, actualIndex);
+        } else if (draggedCenter > itemCenter && draggedIndex < actualIndex) {
+            newIndex = Math.max(newIndex, actualIndex);
+        }
+    });
+    
+    if (newIndex !== draggedIndex) {
+        const routineNumber = draggedIsOptional ? 3 : dayToRoutineMap[currentDay];
+        if (routineNumber !== null) {
+            const exercises = baseRoutines[routineNumber].exercises;
+            const [movedExercise] = exercises.splice(draggedIndex, 1);
+            exercises.splice(newIndex, 0, movedExercise);
+            
+            saveRoutines();
+            console.log(`Ejercicio movido de posición ${draggedIndex} a ${newIndex}`);
+        }
+    }
+    
+    draggedElement.classList.remove('dragging');
+    draggedElement.style.transform = '';
+    draggedElement.style.zIndex = '';
+    
+    allItems.forEach(item => {
+        item.style.transform = '';
+        item.classList.remove('drag-shift-down', 'drag-shift-up');
+    });
+    
+    setTimeout(() => {
+        if (draggedIsOptional) {
+            displayOptionalRoutine();
+        } else {
+            displayRoutine();
+        }
+        draggedElement = null;
+        draggedIndex = null;
+        draggedIsOptional = false;
+    }, 150);
+    
+    console.log('Arrastre finalizado');
 }
 
 function toggleExercise(index, isOptional = false) {
@@ -284,7 +444,7 @@ function toggleExercise(index, isOptional = false) {
     
     updateStats();
     
-    console.log(`✅ Ejercicio ${index + 1} de la rutina ${routineNumber} ${baseRoutines[routineNumber].exercises[index].completed ? 'completado' : 'desmarcado'}`);
+    console.log(`Ejercicio ${index + 1} de la rutina ${routineNumber} ${baseRoutines[routineNumber].exercises[index].completed ? 'completado' : 'desmarcado'}`);
 }
 
 function updateProgress() {
@@ -372,7 +532,7 @@ function addExercise(isOptional = false) {
     
     updateStats();
     
-    console.log(`➕ Ejercicio "${name}" agregado a la rutina ${routineNumber}`);
+    console.log(`Ejercicio "${name}" agregado a la rutina ${routineNumber}`);
 }
 
 function removeExercise(index, isOptional = false) {
@@ -397,7 +557,7 @@ function removeExercise(index, isOptional = false) {
         
         updateStats();
         
-        console.log(`🗑️ Ejercicio "${exerciseName}" eliminado de la rutina ${routineNumber}`);
+        console.log(`Ejercicio "${exerciseName}" eliminado de la rutina ${routineNumber}`);
     }
 }
 
@@ -425,15 +585,15 @@ function editExercise(index, isOptional = false) {
         displayRoutine();
     }
     
-    console.log(`✏️ Ejercicio "${oldName}" editado en la rutina ${routineNumber}`);
+    console.log(`Ejercicio "${oldName}" editado en la rutina ${routineNumber}`);
 }
 
 function debugRoutines() {
-    console.log('🔍 Estado actual de las rutinas:');
-    console.log('Base Routines:', baseRoutines);
-    console.log('Current Day:', currentDay);
-    console.log('Current Routine Number:', dayToRoutineMap[currentDay]);
-    console.log('Current Routine:', getCurrentRoutine());
+    console.log('Estado actual de las rutinas:');
+    console.log('Rutinas base:', baseRoutines);
+    console.log('Dia actual:', currentDay);
+    console.log('Numero de rutina actual:', dayToRoutineMap[currentDay]);
+    console.log('Rutina actual:', getCurrentRoutine());
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
