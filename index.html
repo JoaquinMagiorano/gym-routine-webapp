@@ -20,22 +20,29 @@
         </div>
         
         <div class="row mb-4">
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stat-item">
                     <h6 class="text-muted mb-1">Ejercicios Hoy</h6>
                     <h4 class="text-white mb-0" id="todayTotal">0</h4>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stat-item">
                     <h6 class="text-muted mb-1">Completados</h6>
                     <h4 class="text-success mb-0" id="todayCompleted">0</h4>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="stat-item">
                     <h6 class="text-muted mb-1">Progreso</h6>
                     <h4 class="text-info mb-0" id="todayProgress">0%</h4>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-item">
+                    <button class="btn btn-primary w-100" onclick="openManageRoutinesModal()">
+                        <i class="bi bi-gear me-2"></i>Gestionar Rutinas
+                    </button>
                 </div>
             </div>
         </div>
@@ -55,11 +62,6 @@
             <div class="card-body p-4" id="routineContent">
                 <!-- Contenido de la rutina -->
             </div>
-
-            <div class="card-body p-4" id="optionalRoutine">
-                <!-- Contenido de la rutina -->
-            </div>
-
         </div>
         
         <div class="text-center mt-4">
@@ -69,6 +71,130 @@
             </small>
         </div>
     </div>
+
+    <!-- Modal para Gestionar Rutinas -->
+    <div class="modal fade" id="manageRoutinesModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-calendar-week me-2"></i>Gestionar Rutinas
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <button class="btn btn-success mb-3" onclick="openCreateRoutineModal()">
+                        <i class="bi bi-plus-circle me-2"></i>Crear Nueva Rutina
+                    </button>
+                    <div id="routinesList">
+                        <!-- Lista de rutinas -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para crear y/o editar Rutina -->
+    <div class="modal fade" id="routineEditorModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="routineEditorTitle">
+                        <i class="bi bi-plus-circle me-2"></i>Nueva Rutina
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Nombre de la rutina -->
+                    <div class="mb-4">
+                        <label for="routineName" class="form-label">Nombre de la Rutina</label>
+                        <input type="text" class="form-control" id="routineName" placeholder="Ej: Pecho y Espalda">
+                    </div>
+
+                    <!-- Días de la semana -->
+                    <div class="mb-4">
+                        <label class="form-label">Días de la Semana</label>
+                        <div class="days-selector">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="dayMonday" value="monday">
+                                <label class="form-check-label" for="dayMonday">Lun</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="dayTuesday" value="tuesday">
+                                <label class="form-check-label" for="dayTuesday">Mar</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="dayWednesday" value="wednesday">
+                                <label class="form-check-label" for="dayWednesday">Mie</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="dayThursday" value="thursday">
+                                <label class="form-check-label" for="dayThursday">Jue</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="dayFriday" value="friday">
+                                <label class="form-check-label" for="dayFriday">Vie</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="daySaturday" value="saturday">
+                                <label class="form-check-label" for="daySaturday">Sab</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="checkbox" id="daySunday" value="sunday">
+                                <label class="form-check-label" for="daySunday">Dom</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ejercicios -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Ejercicios</label>
+                            <button class="btn btn-sm btn-outline-primary" onclick="addExerciseToModal()">
+                                <i class="bi bi-plus me-1"></i>Agregar Ejercicio
+                            </button>
+                        </div>
+                        <div id="exercisesList" class="exercises-list">
+                            <!-- Lista de ejercicios del modal -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="saveRoutine()">Guardar Rutina</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para agregar y/o editar ejercicio individual -->
+    <div class="modal fade" id="exerciseModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exerciseModalTitle">
+                        <i class="bi bi-plus-circle me-2"></i>Agregar Ejercicio
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="exerciseName" class="form-label">Nombre del Ejercicio</label>
+                        <input type="text" class="form-control" id="exerciseName" placeholder="Ej: Press de banca">
+                    </div>
+                    <div class="mb-3">
+                        <label for="exerciseSets" class="form-label">Series y Repeticiones</label>
+                        <input type="text" class="form-control" id="exerciseSets" placeholder="Ej: 3x10 - 20kg">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="confirmExerciseModal()">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script src="javascript.js"></script>
 </body>

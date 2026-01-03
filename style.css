@@ -116,7 +116,7 @@ body {
     margin: 5px;
 }
 
-/* Estilos para el botón de arrastre */
+/* Estilos para el boton de arrastre */
 .btn-drag-handle {
     position: absolute;
     right: 10px;
@@ -146,7 +146,6 @@ body {
     cursor: grabbing;
 }
 
-/* Estilos durante el arrastre - SIN ROTACIÓN */
 .exercise-item.dragging {
     opacity: 0.85;
     cursor: grabbing;
@@ -154,20 +153,163 @@ body {
     background: rgba(0, 123, 255, 0.2) !important;
     border-color: #007bff !important;
     transition: opacity 0.2s ease, box-shadow 0.2s ease;
-    /* NO HAY transform: rotate() */
 }
 
-/* Animación fluida para los elementos que se desplazan */
 .exercise-item.drag-shift-down,
 .exercise-item.drag-shift-up {
     transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* Brillo suave en los elementos que se están moviendo */
 .exercise-item.drag-shift-down {
     background: rgba(60, 60, 60, 0.6) !important;
 }
 
 .exercise-item.drag-shift-up {
     background: rgba(60, 60, 60, 0.6) !important;
+}
+
+/* Estilos para el modal de rutinas */
+.days-selector {
+    background: rgba(50, 50, 50, 0.5);
+    padding: 15px;
+    border-radius: 10px;
+}
+
+.days-selector .form-check-inline {
+    margin-right: 15px;
+    margin-bottom: 10px;
+}
+
+.exercises-list {
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(50, 50, 50, 0.3);
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.modal-exercise-item {
+    background: rgba(60, 60, 60, 0.5);
+    border: 1px solid #505050;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.modal-exercise-item:hover {
+    background: rgba(70, 70, 70, 0.7);
+}
+
+.routine-section {
+    background: rgba(45, 45, 45, 0.5);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid #404040;
+}
+
+.routine-header h5 {
+    margin: 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+}
+
+.list-group-item {
+    background: rgba(50, 50, 50, 0.8);
+    border-color: #404040;
+    margin-bottom: 10px;
+    border-radius: 8px !important;
+}
+
+.list-group-item:hover {
+    background: rgba(60, 60, 60, 0.9);
+}
+
+.exercises-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.exercises-list::-webkit-scrollbar-track {
+    background: rgba(30, 30, 30, 0.5);
+    border-radius: 10px;
+}
+
+.exercises-list::-webkit-scrollbar-thumb {
+    background: rgba(100, 100, 100, 0.8);
+    border-radius: 10px;
+}
+
+.exercises-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(120, 120, 120, 1);
+}
+
+/* Estilos para el modal de ejercicio */
+#exerciseModal .modal-content {
+    background: rgba(40, 40, 40, 0.95);
+    border: 1px solid #404040;
+    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+}
+
+#exerciseModal .modal-header {
+    border-bottom: 1px solid #404040;
+    background: linear-gradient(45deg, #007bff, #0056b3);
+}
+
+#exerciseModal .modal-footer {
+    border-top: 1px solid #404040;
+}
+
+#exerciseModal .form-control {
+    background: rgba(50, 50, 50, 0.8);
+    border: 1px solid #505050;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+#exerciseModal .form-control:focus {
+    background: rgba(60, 60, 60, 0.9);
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    color: #fff;
+}
+
+#exerciseModal .form-control::placeholder {
+    color: #999;
+}
+
+#exerciseModal .form-label {
+    color: #ccc;
+    font-weight: 500;
+}
+
+.modal-content {
+    background: rgba(40, 40, 40, 0.95);
+    border: 1px solid #404040;
+}
+
+.modal-header {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border-bottom: 1px solid #404040;
+}
+
+.modal-body {
+    background: rgba(30, 30, 30, 0.5);
+}
+
+.modal-footer {
+    border-top: 1px solid #404040;
+    background: rgba(35, 35, 35, 0.8);
+}
+
+.btn-close {
+    filter: invert(1);
+}
+
+/* Animacion de entrada para el modal */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: none;
 }

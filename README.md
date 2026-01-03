@@ -1,5 +1,4 @@
-# Webapp estatica de uso personal para seguir una rutina de gimnasio de 4 dias
-- Se pueden modificar, añadir y borrar ejercicios.
+# Webapp estatica de uso personal para guardar y visualizar tus rutinas
+- Se pueden añadir, modificar y borrar tanto rutinas como ejercicios.
 - Almacena localmente las rutinas modificadas.
-- Incluye una rutina por defecto.
-- Incluye una rutina opcional.
+- Utiliza principalmente Bootstrap para el estilo
