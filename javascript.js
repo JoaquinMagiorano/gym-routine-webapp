@@ -42,13 +42,13 @@ const defaultBaseRoutines = {
 };
 
 const dayToRoutineMap = {
-    0: null, // Domingo - Descanso
-    1: 1,    // Lunes - Rutina 1
-    2: 2,    // Martes - Rutina 2  
-    3: null, // Miércoles - Descanso
-    4: 1,    // Jueves - Rutina 1
-    5: 2,    // Viernes - Rutina 2
-    6: null  // Sábado - Descanso
+    0: null,
+    1: 1,
+    2: 2,
+    3: null,
+    4: 1,
+    5: 2,
+    6: null
 };
 
 const restDayInfo = {
@@ -70,7 +70,6 @@ function initApp() {
     loadRoutines();
     resetAllExercisesToIncomplete();
     displayCurrentDay();
-    displayOptionalRoutine();
     updateStats();
 }
 
@@ -123,12 +122,7 @@ function displayCurrentDay() {
     const today = new Date();
     currentDay = today.getDay();
     
-    const currentRoutine = getCurrentRoutine();
-    const routineNumber = dayToRoutineMap[currentDay];
-    
-    let titleText = `${days[currentDay]} - ${currentRoutine.name}`;
-    
-    document.getElementById('dayTitle').textContent = titleText;
+    document.getElementById('dayTitle').textContent = `${days[currentDay]} - Todas las Rutinas`;
     
     document.getElementById('dayDate').textContent = 
         today.toLocaleDateString('es-ES', { 
@@ -138,66 +132,98 @@ function displayCurrentDay() {
             day: 'numeric' 
         });
 
-    displayRoutine();
-    displayOptionalRoutine();
-}
-
-function displayRoutine() {
-    const routine = getCurrentRoutine();
-    const content = document.getElementById('routineContent');
-
-    if (routine.exercises.length === 0) {
-        content.innerHTML = `
-            <div class="rest-day">
-                <i class="bi bi-cup-hot" style="font-size: 3rem; color: #6c757d;"></i>
-                <h4 class="mt-3">Día de descanso</h4>
-                <p>¡Disfruta tu día libre! Tu cuerpo necesita recuperarse.</p>
-                ${isEditMode && dayToRoutineMap[currentDay] !== null ? '<button class="btn btn-outline-primary mt-3" onclick="addExercise()">Agregar ejercicio</button>' : ''}
-            </div>
-        `;
-    } else {
-        let html = '';
-        routine.exercises.forEach((exercise, index) => {
-            html += createExerciseHTML(exercise, index);
-        });
-        
-        if (isEditMode && dayToRoutineMap[currentDay] !== null) {
-            html += `
-                <div class="text-center mt-3">
-                    <button class="btn btn-outline-success" onclick="addExercise()">
-                        <i class="bi bi-plus-circle me-2"></i>Agregar ejercicio
-                    </button>
-                </div>
-            `;
-        }
-        
-        content.innerHTML = html;
-    }
-    
-    if (isEditMode && dayToRoutineMap[currentDay] !== null) {
-        const routineNumber = dayToRoutineMap[currentDay];
-        const sharedDays = Object.keys(dayToRoutineMap)
-            .filter(day => dayToRoutineMap[day] === routineNumber)
-            .map(day => ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][day]);
-        
-        content.innerHTML = `
-            <div class="alert alert-info mb-3">
-                <i class="bi bi-info-circle me-2"></i>
-                <strong>Modo Edición:</strong> Los cambios se guardarán para todos los días que usan esta rutina: <strong>${sharedDays.join(', ')}</strong>
-            </div>
-        ` + content.innerHTML;
-    }
-    
+    displayAllRoutines();
     updateProgress();
 }
 
-function createExerciseHTML(exercise, index, isOptional = false) {
-    const canEdit = isEditMode && (isOptional || dayToRoutineMap[currentDay] !== null);
+function displayAllRoutines() {
+    const content = document.getElementById('routineContent');
+    const optionalDiv = document.getElementById('optionalRoutine');
+    
+    let html = '';
+    
+    // Rutina 1
+    html += `
+        <div class="mt-4 mb-3">
+            <h5 class="text-white">
+                <i class="bi bi-clipboard-check me-2"></i>
+                ${baseRoutines[1].name}
+            </h5>
+        </div>
+    `;
+    baseRoutines[1].exercises.forEach((exercise, index) => {
+        html += createExerciseHTML(exercise, index, false, 1);
+    });
+    
+    if (isEditMode) {
+        html += `
+            <div class="text-center mt-3 mb-4">
+                <button class="btn btn-sm btn-outline-success" onclick="addExercise(false, 1)">
+                    <i class="bi bi-plus-circle me-2"></i>Agregar ejercicio a Rutina 1
+                </button>
+            </div>
+        `;
+    }
+    
+    // Rutina 2
+    html += `
+        <div class="mt-4 mb-3">
+            <h5 class="text-white">
+                <i class="bi bi-clipboard-check me-2"></i>
+                ${baseRoutines[2].name}
+            </h5>
+        </div>
+    `;
+    baseRoutines[2].exercises.forEach((exercise, index) => {
+        html += createExerciseHTML(exercise, index, false, 2);
+    });
+    
+    if (isEditMode) {
+        html += `
+            <div class="text-center mt-3 mb-4">
+                <button class="btn btn-sm btn-outline-success" onclick="addExercise(false, 2)">
+                    <i class="bi bi-plus-circle me-2"></i>Agregar ejercicio a Rutina 2
+                </button>
+            </div>
+        `;
+    }
+    
+    content.innerHTML = html;
+    
+    // Rutina Opcional
+    let optionalHtml = `
+        <div class="mt-4 mb-3">
+            <h5 class="text-white-50">
+                <i class="bi bi-star me-2"></i>
+                ${baseRoutines[3].name}
+            </h5>
+        </div>
+    `;
+    
+    baseRoutines[3].exercises.forEach((exercise, index) => {
+        optionalHtml += createExerciseHTML(exercise, index, true, 3);
+    });
+    
+    if (isEditMode) {
+        optionalHtml += `
+            <div class="text-center mt-3">
+                <button class="btn btn-sm btn-outline-success" onclick="addExercise(true, 3)">
+                    <i class="bi bi-plus-circle me-2"></i>Agregar ejercicio opcional
+                </button>
+            </div>
+        `;
+    }
+    
+    optionalDiv.innerHTML = optionalHtml;
+}
+
+function createExerciseHTML(exercise, index, isOptional = false, routineNum = null) {
+    const canEdit = isEditMode;
     
     const dragHandle = canEdit ? `
         <button class="btn-drag-handle" 
-                onmousedown="startDrag(event, ${index}, ${isOptional})"
-                ontouchstart="startDrag(event, ${index}, ${isOptional})"
+                onmousedown="startDrag(event, ${index}, ${routineNum})"
+                ontouchstart="startDrag(event, ${index}, ${routineNum})"
                 title="Arrastrar para reordenar">
             <i class="bi bi-grip-vertical"></i>
         </button>
@@ -205,10 +231,10 @@ function createExerciseHTML(exercise, index, isOptional = false) {
     
     const editControls = canEdit ? `
         <div class="mt-2">
-            <button class="btn btn-sm btn-outline-danger" onclick="removeExercise(${index}, ${isOptional})">
+            <button class="btn btn-sm btn-outline-danger" onclick="removeExercise(${index}, ${routineNum})">
                 <i class="bi bi-trash"></i>
             </button>
-            <button class="btn btn-sm btn-outline-warning ms-2" onclick="editExercise(${index}, ${isOptional})">
+            <button class="btn btn-sm btn-outline-warning ms-2" onclick="editExercise(${index}, ${routineNum})">
                 <i class="bi bi-pencil"></i>
             </button>
         </div>
@@ -217,14 +243,14 @@ function createExerciseHTML(exercise, index, isOptional = false) {
     return `
         <div class="exercise-item ${exercise.completed ? 'completed' : ''}" 
              data-index="${index}" 
-             data-optional="${isOptional}"
+             data-routine="${routineNum}"
              ${canEdit ? 'style="border: 2px dashed #ffc107; background: rgba(255, 193, 7, 0.1);"' : ''}>
             ${dragHandle}
             <div class="d-flex align-items-center">
                 <input type="checkbox" 
                         class="form-check-input exercise-checkbox" 
                         ${exercise.completed ? 'checked' : ''} 
-                        onchange="toggleExercise(${index}, ${isOptional})"
+                        onchange="toggleExercise(${index}, ${routineNum})"
                         ${isEditMode ? 'disabled' : ''}>
                 <div class="flex-grow-1">
                     <h6 class="mb-1 ${exercise.completed ? 'text-decoration-line-through' : ''}">${exercise.name}</h6>
@@ -237,59 +263,11 @@ function createExerciseHTML(exercise, index, isOptional = false) {
     `;
 }
 
-function displayOptionalRoutine() {
-    const optionalDiv = document.getElementById('optionalRoutine');
-    
-    if (!optionalDiv) {
-        console.warn('No se encontró el div con id="optionalRoutine"');
-        return;
-    }
-    
-    if (currentDay === 3) {
-        optionalDiv.innerHTML = '';
-        return;
-    }
-    
-    if (!baseRoutines[3]) {
-        console.warn('Rutina opcional no encontrada');
-        baseRoutines[3] = JSON.parse(JSON.stringify(defaultBaseRoutines[3]));
-        saveRoutines();
-    }
-
-    const optionalRoutine = baseRoutines[3];
-
-    let html = `
-        <div class="mt-4 mb-3">
-            <h5 class="text-white-50">
-                <i class="bi bi-star me-2"></i>
-                ${optionalRoutine.name}
-            </h5>
-        </div>
-    `;
-
-    optionalRoutine.exercises.forEach((exercise, index) => {
-        html += createExerciseHTML(exercise, index, true);
-    });
-    
-    if (isEditMode) {
-        html += `
-            <div class="text-center mt-3">
-                <button class="btn btn-sm btn-outline-success" onclick="addExercise(true)">
-                    <i class="bi bi-plus-circle me-2"></i>Agregar ejercicio opcional
-                </button>
-            </div>
-        `;
-    }
-    
-    optionalDiv.innerHTML = html;
-    console.log('Rutina opcional cargada');
-}
-
-function startDrag(event, index, isOptional) {
+function startDrag(event, index, routineNum) {
     event.preventDefault();
     
     draggedIndex = index;
-    draggedIsOptional = isOptional;
+    draggedIsOptional = routineNum;
     
     const target = event.target.closest('.btn-drag-handle');
     draggedElement = target.closest('.exercise-item');
@@ -306,7 +284,7 @@ function startDrag(event, index, isOptional) {
     
     currentY = 0;
     
-    draggedElement.classList.add('dragging'); // Agrega clase de arrastre
+    draggedElement.classList.add('dragging');
     draggedElement.style.zIndex = '1000';
     
     if (event.type === 'mousedown') {
@@ -317,7 +295,7 @@ function startDrag(event, index, isOptional) {
         document.addEventListener('touchend', endDrag);
     }
     
-    console.log(`Iniciando arrastre del ejercicio ${index} (Opcional: ${isOptional})`);
+    console.log(`Iniciando arrastre del ejercicio ${index} de rutina ${routineNum}`);
 }
 
 function drag(event) {
@@ -328,21 +306,24 @@ function drag(event) {
     const clientY = event.type === 'mousemove' ? event.clientY : event.touches[0].clientY;
     currentY = clientY - dragStartY;
     
-    draggedElement.style.transform = `translateY(${currentY}px)`; // Mover el elemento arrastrado
+    draggedElement.style.transform = `translateY(${currentY}px)`;
     
-    const container = draggedIsOptional ? 
+    const container = draggedIsOptional === 3 ? 
         document.getElementById('optionalRoutine') : 
         document.getElementById('routineContent');
     
     const allItems = Array.from(container.querySelectorAll('.exercise-item'))
-        .filter(item => item !== draggedElement);
+        .filter(item => {
+            const itemRoutine = parseInt(item.dataset.routine);
+            return item !== draggedElement && itemRoutine === draggedIsOptional;
+        });
     
     const draggedRect = draggedElement.getBoundingClientRect();
     const draggedCenter = draggedRect.top + draggedRect.height / 2;
     
     let newIndex = draggedIndex;
     
-    allItems.forEach((item, i) => {
+    allItems.forEach((item) => {
         const itemRect = item.getBoundingClientRect();
         const itemCenter = itemRect.top + itemRect.height / 2;
         const actualIndex = parseInt(item.dataset.index);
@@ -350,11 +331,11 @@ function drag(event) {
         item.style.transform = '';
         item.classList.remove('drag-shift-down', 'drag-shift-up');
         
-        if (draggedCenter < itemCenter && draggedIndex > actualIndex) { // Si el elemento arrastrado está por encima de este item
+        if (draggedCenter < itemCenter && draggedIndex > actualIndex) {
             item.style.transform = `translateY(${draggedRect.height + 10}px)`;
             item.classList.add('drag-shift-down');
             newIndex = Math.min(newIndex, actualIndex);
-        } else if (draggedCenter > itemCenter && draggedIndex < actualIndex) { // Si el elemento arrastrado está por debajo de este item
+        } else if (draggedCenter > itemCenter && draggedIndex < actualIndex) {
             item.style.transform = `translateY(-${draggedRect.height + 10}px)`;
             item.classList.add('drag-shift-up');
             newIndex = Math.max(newIndex, actualIndex);
@@ -370,12 +351,15 @@ function endDrag(event) {
     document.removeEventListener('touchmove', drag);
     document.removeEventListener('touchend', endDrag);
     
-    const container = draggedIsOptional ? 
+    const container = draggedIsOptional === 3 ? 
         document.getElementById('optionalRoutine') : 
         document.getElementById('routineContent');
     
     const allItems = Array.from(container.querySelectorAll('.exercise-item'))
-        .filter(item => item !== draggedElement);
+        .filter(item => {
+            const itemRoutine = parseInt(item.dataset.routine);
+            return item !== draggedElement && itemRoutine === draggedIsOptional;
+        });
     
     const draggedRect = draggedElement.getBoundingClientRect();
     const draggedCenter = draggedRect.top + draggedRect.height / 2;
@@ -395,7 +379,7 @@ function endDrag(event) {
     });
     
     if (newIndex !== draggedIndex) {
-        const routineNumber = draggedIsOptional ? 3 : dayToRoutineMap[currentDay];
+        const routineNumber = draggedIsOptional;
         if (routineNumber !== null) {
             const exercises = baseRoutines[routineNumber].exercises;
             const [movedExercise] = exercises.splice(draggedIndex, 1);
@@ -416,11 +400,7 @@ function endDrag(event) {
     });
     
     setTimeout(() => {
-        if (draggedIsOptional) {
-            displayOptionalRoutine();
-        } else {
-            displayRoutine();
-        }
+        displayAllRoutines();
         draggedElement = null;
         draggedIndex = null;
         draggedIsOptional = false;
@@ -429,33 +409,29 @@ function endDrag(event) {
     console.log('Arrastre finalizado');
 }
 
-function toggleExercise(index, isOptional = false) {
-    const routineNumber = isOptional ? 3 : dayToRoutineMap[currentDay];
-    if (routineNumber === null) return;
+function toggleExercise(index, routineNum) {
+    if (!baseRoutines[routineNum]) return;
     
-    baseRoutines[routineNumber].exercises[index].completed = !baseRoutines[routineNumber].exercises[index].completed;
+    baseRoutines[routineNum].exercises[index].completed = !baseRoutines[routineNum].exercises[index].completed;
     saveRoutines();
     
-    if (isOptional) {
-        displayOptionalRoutine();
-    } else {
-        displayRoutine();
-    }
-    
+    displayAllRoutines();
     updateStats();
     
-    console.log(`Ejercicio ${index + 1} de la rutina ${routineNumber} ${baseRoutines[routineNumber].exercises[index].completed ? 'completado' : 'desmarcado'}`);
+    console.log(`Ejercicio ${index + 1} de la rutina ${routineNum} ${baseRoutines[routineNum].exercises[index].completed ? 'completado' : 'desmarcado'}`);
 }
 
 function updateProgress() {
-    const routine = getCurrentRoutine();
-    let total = routine.exercises.length;
-    let completed = routine.exercises.filter(ex => ex.completed).length;
+    let total = 0;
+    let completed = 0;
     
-    if (currentDay !== 3 && baseRoutines[3]) {
-        total += baseRoutines[3].exercises.length;
-        completed += baseRoutines[3].exercises.filter(ex => ex.completed).length;
-    }
+    // Contar todos los ejercicios de todas las rutinas
+    [1, 2, 3].forEach(routineNum => {
+        if (baseRoutines[routineNum]) {
+            total += baseRoutines[routineNum].exercises.length;
+            completed += baseRoutines[routineNum].exercises.filter(ex => ex.completed).length;
+        }
+    });
     
     if (total === 0) {
         document.getElementById('progressFill').style.width = '0%';
@@ -467,14 +443,16 @@ function updateProgress() {
 }
 
 function updateStats() {
-    const routine = getCurrentRoutine();
-    let total = routine.exercises.length;
-    let completed = routine.exercises.filter(ex => ex.completed).length;
+    let total = 0;
+    let completed = 0;
     
-    if (currentDay !== 3 && baseRoutines[3]) {
-        total += baseRoutines[3].exercises.length;
-        completed += baseRoutines[3].exercises.filter(ex => ex.completed).length;
-    }
+    // Contar todos los ejercicios de todas las rutinas
+    [1, 2, 3].forEach(routineNum => {
+        if (baseRoutines[routineNum]) {
+            total += baseRoutines[routineNum].exercises.length;
+            completed += baseRoutines[routineNum].exercises.filter(ex => ex.completed).length;
+        }
+    });
     
     const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
@@ -484,13 +462,6 @@ function updateStats() {
 }
 
 function toggleEditMode() {
-    const routineNumber = dayToRoutineMap[currentDay];
-    
-    if (routineNumber === null) {
-        alert('No se puede editar en días de descanso');
-        return;
-    }
-    
     isEditMode = !isEditMode;
     const editBtn = document.getElementById('editBtn');
     
@@ -502,13 +473,11 @@ function toggleEditMode() {
         editBtn.style.background = 'rgba(255, 255, 255, 0.2)';
     }
     
-    displayRoutine();
-    displayOptionalRoutine();
+    displayAllRoutines();
 }
 
-function addExercise(isOptional = false) {
-    const routineNumber = isOptional ? 3 : dayToRoutineMap[currentDay];
-    if (routineNumber === null && !isOptional) return;
+function addExercise(isOptional = false, routineNum = null) {
+    if (!routineNum) return;
     
     const name = prompt("Nombre del ejercicio:");
     if (!name) return;
@@ -516,56 +485,40 @@ function addExercise(isOptional = false) {
     const sets = prompt("Series y repeticiones (ej: 3x10 - 15kg):");
     if (!sets) return;
 
-    baseRoutines[routineNumber].exercises.push({
+    baseRoutines[routineNum].exercises.push({
         name: name,
         sets: sets,
         completed: false
     });
 
     saveRoutines();
-    
-    if (isOptional) {
-        displayOptionalRoutine();
-    } else {
-        displayRoutine();
-    }
-    
+    displayAllRoutines();
     updateStats();
     
-    console.log(`Ejercicio "${name}" agregado a la rutina ${routineNumber}`);
+    console.log(`Ejercicio "${name}" agregado a la rutina ${routineNum}`);
 }
 
-function removeExercise(index, isOptional = false) {
-    const routineNumber = isOptional ? 3 : dayToRoutineMap[currentDay];
-    if (routineNumber === null && !isOptional) return;
+function removeExercise(index, routineNum) {
+    if (!baseRoutines[routineNum]) return;
     
-    const exerciseName = baseRoutines[routineNumber].exercises[index].name;
+    const exerciseName = baseRoutines[routineNum].exercises[index].name;
     
-    const confirmMessage = isOptional 
-        ? `¿Estás seguro de que quieres eliminar "${exerciseName}"?\n\nEste ejercicio se eliminará de la rutina opcional.`
-        : `¿Estás seguro de que quieres eliminar "${exerciseName}"?\n\nEste ejercicio se eliminará de todos los días que usan la Rutina ${routineNumber}.`;
+    const confirmMessage = `¿Estás seguro de que quieres eliminar "${exerciseName}"?`;
     
     if (confirm(confirmMessage)) {
-        baseRoutines[routineNumber].exercises.splice(index, 1);
+        baseRoutines[routineNum].exercises.splice(index, 1);
         saveRoutines();
-        
-        if (isOptional) {
-            displayOptionalRoutine();
-        } else {
-            displayRoutine();
-        }
-        
+        displayAllRoutines();
         updateStats();
         
-        console.log(`Ejercicio "${exerciseName}" eliminado de la rutina ${routineNumber}`);
+        console.log(`Ejercicio "${exerciseName}" eliminado de la rutina ${routineNum}`);
     }
 }
 
-function editExercise(index, isOptional = false) {
-    const routineNumber = isOptional ? 3 : dayToRoutineMap[currentDay];
-    if (routineNumber === null && !isOptional) return;
+function editExercise(index, routineNum) {
+    if (!baseRoutines[routineNum]) return;
     
-    const exercise = baseRoutines[routineNumber].exercises[index];
+    const exercise = baseRoutines[routineNum].exercises[index];
     
     const newName = prompt("Nombre del ejercicio:", exercise.name);
     if (newName === null) return;
@@ -574,18 +527,13 @@ function editExercise(index, isOptional = false) {
     if (newSets === null) return;
 
     const oldName = exercise.name;
-    baseRoutines[routineNumber].exercises[index].name = newName || exercise.name;
-    baseRoutines[routineNumber].exercises[index].sets = newSets || exercise.sets;
+    baseRoutines[routineNum].exercises[index].name = newName || exercise.name;
+    baseRoutines[routineNum].exercises[index].sets = newSets || exercise.sets;
 
     saveRoutines();
+    displayAllRoutines();
     
-    if (isOptional) {
-        displayOptionalRoutine();
-    } else {
-        displayRoutine();
-    }
-    
-    console.log(`Ejercicio "${oldName}" editado en la rutina ${routineNumber}`);
+    console.log(`Ejercicio "${oldName}" editado en la rutina ${routineNum}`);
 }
 
 function debugRoutines() {
