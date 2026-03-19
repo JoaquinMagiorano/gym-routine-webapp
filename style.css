@@ -101,7 +101,13 @@ body {
     height: 100%;
     background: linear-gradient(45deg, #28a745, #20c997);
     border-radius: 3px;
-    transition: width 0.5s ease;
+    transition: width 0.5s ease, background 0.5s ease;
+}
+
+/* Barra de progreso cuando excede 100% */
+.progress-fill.progress-bonus {
+    background: linear-gradient(45deg, #ffc107, #ff9800);
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
 }
 
 .stats {
@@ -206,6 +212,13 @@ body {
     border-radius: 12px;
     padding: 20px;
     border: 1px solid #404040;
+    transition: all 0.3s ease;
+}
+
+/* Estilo especial para rutinas opcionales */
+.routine-section.optional-routine {
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    background: rgba(255, 193, 7, 0.05);
 }
 
 .routine-header h5 {
@@ -312,4 +325,17 @@ body {
 
 .modal.show .modal-dialog {
     transform: none;
+}
+
+/* Badge para rutinas opcionales */
+.badge.bg-warning {
+    font-size: 0.75rem;
+    padding: 0.25em 0.6em;
+    font-weight: 600;
+}
+
+/* Animacion para el porcentaje cuando excede 100% */
+#todayProgress.text-warning {
+    font-weight: bold;
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
 }

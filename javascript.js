@@ -14,7 +14,6 @@ let exerciseModalMode = null; // add, edit, addToModal
 let exerciseModalRoutineId = null;
 let exerciseModalIndex = null;
 
-// Mapeo de días numericos a nombres de propiedades
 const dayMap = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
 function initApp() {
@@ -31,23 +30,32 @@ function resetAllCompletedExercises() {
         });
     });
     saveRoutines();
-    console.log('Todos los ejercicios reseteados a no completados');
+    //console.log('Todos los ejercicios reseteados a no completados');
 }
 
 function loadRoutines() {
     const saved = localStorage.getItem('gymRoutines');
     if (saved) {
         routines = JSON.parse(saved);
-        console.log('Rutinas cargadas desde localStorage');
+        
+        // Para que las rutinas ya creadas no se rompan
+        routines.forEach(routine => {
+            if (routine.optional === undefined) {
+                routine.optional = false;
+            }
+        });
+        
+        saveRoutines();
+        //console.log('Rutinas cargadas desde localStorage (migracion aplicada)');
     } else {
         routines = [];
-        console.log('No hay rutinas guardadas');
+        //console.log('No hay rutinas guardadas');
     }
 }
 
 function saveRoutines() {
     localStorage.setItem('gymRoutines', JSON.stringify(routines));
-    console.log('Rutinas guardadas en localStorage');
+    //console.log('Rutinas guardadas en localStorage');
 }
 
 function displayCurrentDay() {
@@ -93,35 +101,31 @@ function displayRoutines() {
         return;
     }
 
+    const normalRoutines = todayRoutines.filter(r => !r.optional);
+    const optionalRoutines = todayRoutines.filter(r => r.optional);
+
     let html = '';
     
-    todayRoutines.forEach(routine => {
+    // Primero rutinas normales
+    normalRoutines.forEach(routine => {
+        html += createRoutineSection(routine);
+    });
+    
+    // Segundo rutinas opcionales
+    if (optionalRoutines.length > 0) {
         html += `
-            <div class="routine-section mb-4">
-                <div class="routine-header mb-3">
-                    <h5 class="text-white">
-                        <i class="bi bi-clipboard-check me-2"></i>
-                        ${routine.name}
-                    </h5>
-                </div>
+            <div class="mt-4 mb-3">
+                <h5 class="text-white-50">
+                    <i class="bi bi-star me-2"></i>
+                    Rutinas Opcionales
+                </h5>
+            </div>
         `;
         
-        routine.exercises.forEach((exercise, index) => {
-            html += createExerciseHTML(exercise, index, routine.id);
+        optionalRoutines.forEach(routine => {
+            html += createRoutineSection(routine, true);
         });
-        
-        if (isEditMode) {
-            html += `
-                <div class="text-center mt-3">
-                    <button class="btn btn-sm btn-outline-success" onclick="addQuickExercise(${routine.id})">
-                        <i class="bi bi-plus-circle me-2"></i>Agregar ejercicio
-                    </button>
-                </div>
-            `;
-        }
-        
-        html += `</div>`;
-    });
+    }
     
     if (isEditMode) {
         content.innerHTML = `
@@ -135,6 +139,36 @@ function displayRoutines() {
     }
     
     updateProgress();
+}
+
+function createRoutineSection(routine, isOptional = false) {
+    let html = `
+        <div class="routine-section mb-4 ${isOptional ? 'optional-routine' : ''}">
+            <div class="routine-header mb-3">
+                <h5 class="text-white">
+                    <i class="bi bi-clipboard-check me-2"></i>
+                    ${routine.name}
+                    ${isOptional ? '<span class="badge bg-warning text-dark ms-2">Opcional</span>' : ''}
+                </h5>
+            </div>
+    `;
+    
+    routine.exercises.forEach((exercise, index) => {
+        html += createExerciseHTML(exercise, index, routine.id);
+    });
+    
+    if (isEditMode) {
+        html += `
+            <div class="text-center mt-3">
+                <button class="btn btn-sm btn-outline-success" onclick="addQuickExercise(${routine.id})">
+                    <i class="bi bi-plus-circle me-2"></i>Agregar ejercicio
+                </button>
+            </div>
+        `;
+    }
+    
+    html += `</div>`;
+    return html;
 }
 
 function createExerciseHTML(exercise, index, routineId) {
@@ -214,7 +248,7 @@ function startDrag(event, index, routineId) {
         document.addEventListener('touchend', endDrag);
     }
     
-    console.log(`Iniciando arrastre del ejercicio ${index} de rutina ${routineId}`);
+    //console.log(`Iniciando arrastre del ejercicio ${index} de rutina ${routineId}`);
 }
 
 function drag(event) {
@@ -292,7 +326,7 @@ function endDrag(event) {
             routine.exercises.splice(newIndex, 0, movedExercise);
             
             saveRoutines();
-            console.log(`Ejercicio movido de posición ${draggedIndex} a ${newIndex}`);
+            //console.log(`Ejercicio movido de posición ${draggedIndex} a ${newIndex}`);
         }
     }
     
@@ -379,38 +413,107 @@ function editExercise(index, routineId) {
 
 function updateProgress() {
     const todayRoutines = getTodayRoutines();
-    let total = 0;
-    let completed = 0;
+    const normalRoutines = todayRoutines.filter(r => !r.optional);
+    const optionalRoutines = todayRoutines.filter(r => r.optional);
     
-    todayRoutines.forEach(routine => {
-        total += routine.exercises.length;
-        completed += routine.exercises.filter(ex => ex.completed).length;
+    let normalTotal = 0;
+    let normalCompleted = 0;
+    
+    normalRoutines.forEach(routine => {
+        normalTotal += routine.exercises.length;
+        normalCompleted += routine.exercises.filter(ex => ex.completed).length;
     });
     
-    if (total === 0) {
-        document.getElementById('progressFill').style.width = '0%';
+    let optionalTotal = 0;
+    let optionalCompleted = 0;
+    
+    optionalRoutines.forEach(routine => {
+        optionalTotal += routine.exercises.length;
+        optionalCompleted += routine.exercises.filter(ex => ex.completed).length;
+    });
+    
+    const progressFill = document.getElementById('progressFill');
+    
+    if (normalTotal === 0) {
+        if (optionalTotal > 0) {
+            const optionalPercentage = Math.round((optionalCompleted / optionalTotal) * 100);
+            progressFill.style.width = optionalPercentage + '%';
+            progressFill.classList.remove('progress-bonus');
+        } else {
+            progressFill.style.width = '0%';
+            progressFill.classList.remove('progress-bonus');
+        }
         return;
     }
 
-    const percentage = Math.round((completed / total) * 100);
-    document.getElementById('progressFill').style.width = percentage + '%';
+    const basePercentage = Math.round((normalCompleted / normalTotal) * 100);
+    
+    let bonusPercentage = 0;
+    if (optionalTotal > 0 && normalCompleted === normalTotal) {
+        bonusPercentage = Math.round((optionalCompleted / normalTotal) * (100 / 2)); // Cada rutina opcional da la mitad de porcentaje que una comun, con un maximo de 150%
+    }
+    
+    const totalPercentage = basePercentage + bonusPercentage;
+    progressFill.style.width = Math.min(totalPercentage, 200) + '%';
+    
+    if (totalPercentage > 100) {
+        progressFill.classList.add('progress-bonus');
+    } else {
+        progressFill.classList.remove('progress-bonus');
+    }
 }
 
 function updateStats() {
     const todayRoutines = getTodayRoutines();
-    let total = 0;
-    let completed = 0;
+    const normalRoutines = todayRoutines.filter(r => !r.optional);
+    const optionalRoutines = todayRoutines.filter(r => r.optional);
     
-    todayRoutines.forEach(routine => {
-        total += routine.exercises.length;
-        completed += routine.exercises.filter(ex => ex.completed).length;
+    let normalTotal = 0;
+    let normalCompleted = 0;
+    
+    normalRoutines.forEach(routine => {
+        normalTotal += routine.exercises.length;
+        normalCompleted += routine.exercises.filter(ex => ex.completed).length;
     });
     
-    const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+    let optionalTotal = 0;
+    let optionalCompleted = 0;
+    
+    optionalRoutines.forEach(routine => {
+        optionalTotal += routine.exercises.length;
+        optionalCompleted += routine.exercises.filter(ex => ex.completed).length;
+    });
+    
+    const totalExercises = normalTotal + optionalTotal;
+    const totalCompleted = normalCompleted + optionalCompleted;
+    
+    let percentage = 0;
+    if (normalTotal > 0) {
+        const basePercentage = Math.round((normalCompleted / normalTotal) * 100);
+        
+        let bonusPercentage = 0;
+        if (optionalTotal > 0 && normalCompleted === normalTotal) {
+            bonusPercentage = Math.round((optionalCompleted / normalTotal) * (100 / 2)); // Cada rutina opcional da la mitad de porcentaje que una comun, con un maximo de 150%
+        }
+        
+        percentage = basePercentage + bonusPercentage;
+    } else if (optionalTotal > 0) {
+        percentage = Math.round((optionalCompleted / optionalTotal) * 100);
+    }
 
-    document.getElementById('todayTotal').textContent = total;
-    document.getElementById('todayCompleted').textContent = completed;
-    document.getElementById('todayProgress').textContent = percentage + '%';
+    document.getElementById('todayTotal').textContent = totalExercises;
+    document.getElementById('todayCompleted').textContent = totalCompleted;
+    
+    const progressElement = document.getElementById('todayProgress');
+    progressElement.textContent = percentage + '%';
+    
+    if (percentage > 100) {
+        progressElement.classList.add('text-warning');
+        progressElement.classList.remove('text-info');
+    } else {
+        progressElement.classList.remove('text-warning');
+        progressElement.classList.add('text-info');
+    }
 }
 
 function toggleEditMode() {
@@ -459,7 +562,10 @@ function displayRoutinesList() {
             <div class="list-group-item">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="flex-grow-1">
-                        <h6 class="mb-1">${routine.name}</h6>
+                        <h6 class="mb-1">
+                            ${routine.name}
+                            ${routine.optional ? '<span class="badge bg-warning text-dark ms-2">Opcional</span>' : ''}
+                        </h6>
                         <small class="text-muted">
                             <i class="bi bi-calendar-week me-1"></i>
                             ${daysActive.length > 0 ? daysActive.join(', ') : 'Sin días asignados'}
@@ -493,6 +599,7 @@ function openCreateRoutineModal() {
     
     document.getElementById('routineEditorTitle').innerHTML = '<i class="bi bi-plus-circle me-2"></i>Nueva Rutina';
     document.getElementById('routineName').value = '';
+    document.getElementById('routineOptional').checked = false;
     
     // Desmarcar todos los dias
     ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'].forEach(day => {
@@ -514,6 +621,7 @@ function editRoutineModal(routineId) {
     
     document.getElementById('routineEditorTitle').innerHTML = '<i class="bi bi-pencil me-2"></i>Editar Rutina';
     document.getElementById('routineName').value = routine.name;
+    document.getElementById('routineOptional').checked = routine.optional || false;
     
     Object.entries(routine.days).forEach(([day, active]) => {
         document.getElementById('day' + day.charAt(0).toUpperCase() + day.slice(1)).checked = active;
@@ -648,6 +756,8 @@ function saveRoutine() {
         sunday: document.getElementById('daySunday').checked
     };
     
+    const optional = document.getElementById('routineOptional').checked;
+    
     if (editingRoutineId) {
         // Editar rutina existente
         const routine = routines.find(r => r.id === editingRoutineId);
@@ -655,6 +765,7 @@ function saveRoutine() {
             routine.name = name;
             routine.days = days;
             routine.exercises = modalExercises;
+            routine.optional = optional;
         }
     } else {
         // Crear nueva rutina
@@ -662,7 +773,8 @@ function saveRoutine() {
             id: Date.now(),
             name: name,
             days: days,
-            exercises: modalExercises
+            exercises: modalExercises,
+            optional: optional
         };
         
         routines.push(newRoutine);
@@ -697,7 +809,7 @@ function deleteRoutine(routineId) {
 document.addEventListener('DOMContentLoaded', () => {
     initApp();
     
-    // Agrego listener para Enter en los campos del modal de ejercicio
+    // Listener para el Enter en los campos del modal de ejercicio
     const exerciseModal = document.getElementById('exerciseModal');
     if (exerciseModal) {
         exerciseModal.addEventListener('keypress', (e) => {
