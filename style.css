@@ -1,7 +1,68 @@
+/* Tema oscuro (el por defecto, oscuro > claro)*/
+:root {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #2d2d2d;
+    --bg-tertiary: #282828;
+    --bg-card: rgba(40, 40, 40, 0.9);
+    --bg-muted: rgba(40, 40, 40, 0.8);
+    --bg-light: rgba(50, 50, 50, 0.5);
+    --bg-lighter: rgba(60, 60, 60, 0.5);
+    --bg-lightest: rgba(70, 70, 70, 0.7);
+    
+    --text-primary: #ffffff;
+    --text-secondary: #aaa;
+    --text-muted: #6c757d;
+    
+    --border-color: #404040;
+    --border-light: #505050;
+    
+    --shadow: rgba(0, 0, 0, 0.3);
+    
+    --header-gradient-1: #007bff;
+    --header-gradient-2: #0056b3;
+    --header-text: #ffffff;
+    
+    --optional-border: rgba(255, 193, 7, 0.3);
+    --optional-bg: rgba(255, 193, 7, 0.05);
+}
+
+/* Tema claro */
+html.light-theme {
+    --bg-primary: #f5f5f5;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #f9f9f9;
+    --bg-card: rgba(255, 255, 255, 0.98);
+    --bg-muted: rgba(250, 250, 250, 0.95);
+    --bg-light: rgba(240, 240, 240, 0.9);
+    --bg-lighter: rgba(235, 235, 235, 0.8);
+    --bg-lightest: rgba(220, 220, 220, 0.9);
+    
+    --text-primary: #1a1a1a;
+    --text-secondary: #555;
+    --text-muted: #888;
+    
+    --border-color: #ddd;
+    --border-light: #e0e0e0;
+    
+    --shadow: rgba(0, 0, 0, 0.08);
+    
+    --header-gradient-1: #4a90e2;
+    --header-gradient-2: #2e5c9a;
+    --header-text: #ffffff;
+    
+    --optional-border: rgba(255, 179, 0, 0.5);
+    --optional-bg: rgba(255, 193, 7, 0.12);
+}
+
+* {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
 body {
-    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-primary);
 }
 
 .main-container {
@@ -10,26 +71,65 @@ body {
     padding: 20px;
 }
 
+/* Boton de Toggle */
+.btn-theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--text-primary);
+    color: var(--bg-primary);
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    box-shadow: 0 4px 12px var(--shadow);
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.btn-theme-toggle:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px var(--shadow);
+}
+
+.btn-theme-toggle:active {
+    transform: scale(0.95);
+}
+
 .routine-card {
-    background: rgba(40, 40, 40, 0.9);
-    border: 1px solid #404040;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
     border-radius: 15px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 32px var(--shadow);
     backdrop-filter: blur(10px);
 }
 
 .day-header {
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    color: white;
+    background: linear-gradient(45deg, var(--header-gradient-1), var(--header-gradient-2));
+    color: var(--header-text);
     padding: 20px;
     border-radius: 15px 15px 0 0;
     text-align: center;
     position: relative;
 }
 
+.day-header h2 {
+    color: var(--header-text);
+    margin-bottom: 8px;
+}
+
+.day-header small {
+    color: rgba(255, 255, 255, 0.9);
+}
+
 .exercise-item {
-    background: rgba(50, 50, 50, 0.5);
-    border: 1px solid #505050;
+    background: var(--bg-light);
+    border: 1px solid var(--border-light);
     border-radius: 10px;
     padding: 15px;
     margin-bottom: 10px;
@@ -38,7 +138,7 @@ body {
 }
 
 .exercise-item:hover {
-    background: rgba(60, 60, 60, 0.7);
+    background: var(--bg-lightest);
     transform: translateY(-2px);
 }
 
@@ -47,13 +147,17 @@ body {
     border-color: #28a745;
 }
 
+.exercise-item h6 {
+    color: var(--text-primary);
+}
+
 .exercise-checkbox {
     transform: scale(1.2);
     margin-right: 12px;
 }
 
 .exercise-details {
-    color: #aaa;
+    color: var(--text-secondary);
     font-size: 0.9em;
     margin-top: 5px;
 }
@@ -61,7 +165,15 @@ body {
 .rest-day {
     text-align: center;
     padding: 40px;
-    color: #6c757d;
+    color: var(--text-muted);
+}
+
+.rest-day h4 {
+    color: var(--text-primary);
+}
+
+.rest-day p {
+    color: var(--text-secondary);
 }
 
 .edit-mode {
@@ -104,7 +216,7 @@ body {
     transition: width 0.5s ease, background 0.5s ease;
 }
 
-/* Barra de progreso cuando excede 100% */
+/* Barra de progreso cuando excede el 100% */
 .progress-fill.progress-bonus {
     background: linear-gradient(45deg, #ffc107, #ff9800);
     box-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
@@ -116,10 +228,19 @@ body {
 }
 
 .stat-item {
-    background: rgba(40, 40, 40, 0.8);
+    background: var(--bg-muted);
+    border: 1px solid var(--border-light);
     border-radius: 10px;
     padding: 15px;
     margin: 5px;
+}
+
+.stat-item h6 {
+    color: var(--text-muted);
+}
+
+.stat-item h4 {
+    color: var(--text-primary);
 }
 
 /* Estilos para el boton de arrastre */
@@ -176,7 +297,7 @@ body {
 
 /* Estilos para el modal de rutinas */
 .days-selector {
-    background: rgba(50, 50, 50, 0.5);
+    background: var(--bg-light);
     padding: 15px;
     border-radius: 10px;
 }
@@ -189,14 +310,14 @@ body {
 .exercises-list {
     max-height: 300px;
     overflow-y: auto;
-    background: rgba(50, 50, 50, 0.3);
+    background: var(--bg-light);
     border-radius: 10px;
     padding: 15px;
 }
 
 .modal-exercise-item {
-    background: rgba(60, 60, 60, 0.5);
-    border: 1px solid #505050;
+    background: var(--bg-lighter);
+    border: 1px solid var(--border-light);
     border-radius: 8px;
     padding: 10px;
     margin-bottom: 10px;
@@ -204,38 +325,51 @@ body {
 }
 
 .modal-exercise-item:hover {
-    background: rgba(70, 70, 70, 0.7);
+    background: var(--bg-lightest);
+}
+
+.modal-exercise-item strong {
+    color: var(--text-primary);
 }
 
 .routine-section {
-    background: rgba(45, 45, 45, 0.5);
+    background: var(--bg-light);
     border-radius: 12px;
     padding: 20px;
-    border: 1px solid #404040;
+    border: 1px solid var(--border-color);
     transition: all 0.3s ease;
 }
 
 /* Estilo especial para rutinas opcionales */
 .routine-section.optional-routine {
-    border: 1px solid rgba(255, 193, 7, 0.3);
-    background: rgba(255, 193, 7, 0.05);
+    border: 1px solid var(--optional-border);
+    background: var(--optional-bg);
 }
 
 .routine-header h5 {
     margin: 0;
     padding-bottom: 10px;
-    border-bottom: 2px solid #007bff;
+    border-bottom: 2px solid var(--header-gradient-1);
+    color: var(--text-primary);
 }
 
 .list-group-item {
-    background: rgba(50, 50, 50, 0.8);
-    border-color: #404040;
+    background: var(--bg-lighter);
+    border-color: var(--border-color);
     margin-bottom: 10px;
     border-radius: 8px !important;
 }
 
+.list-group-item h6 {
+    color: var(--text-primary);
+}
+
+.list-group-item small {
+    color: var(--text-muted);
+}
+
 .list-group-item:hover {
-    background: rgba(60, 60, 60, 0.9);
+    background: var(--bg-lightest);
 }
 
 .exercises-list::-webkit-scrollbar {
@@ -243,7 +377,7 @@ body {
 }
 
 .exercises-list::-webkit-scrollbar-track {
-    background: rgba(30, 30, 30, 0.5);
+    background: var(--bg-light);
     border-radius: 10px;
 }
 
@@ -258,67 +392,77 @@ body {
 
 /* Estilos para el modal de ejercicio */
 #exerciseModal .modal-content {
-    background: rgba(40, 40, 40, 0.95);
-    border: 1px solid #404040;
-    box-shadow: 0 10px 50px rgba(0, 0, 0, 0.5);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 50px var(--shadow);
 }
 
 #exerciseModal .modal-header {
-    border-bottom: 1px solid #404040;
-    background: linear-gradient(45deg, #007bff, #0056b3);
+    border-bottom: 1px solid var(--border-color);
+    background: linear-gradient(45deg, var(--header-gradient-1), var(--header-gradient-2));
+    color: var(--header-text);
+}
+
+#exerciseModal .modal-header .modal-title {
+    color: var(--header-text);
 }
 
 #exerciseModal .modal-footer {
-    border-top: 1px solid #404040;
+    border-top: 1px solid var(--border-color);
 }
 
 #exerciseModal .form-control {
-    background: rgba(50, 50, 50, 0.8);
-    border: 1px solid #505050;
-    color: #fff;
+    background: var(--bg-light);
+    border: 1px solid var(--border-light);
+    color: var(--text-primary);
     transition: all 0.3s ease;
 }
 
 #exerciseModal .form-control:focus {
-    background: rgba(60, 60, 60, 0.9);
-    border-color: #007bff;
+    background: var(--bg-lighter);
+    border-color: var(--header-gradient-1);
     box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    color: #fff;
+    color: var(--text-primary);
 }
 
 #exerciseModal .form-control::placeholder {
-    color: #999;
+    color: var(--text-secondary);
 }
 
 #exerciseModal .form-label {
-    color: #ccc;
+    color: var(--text-primary);
     font-weight: 500;
 }
 
 .modal-content {
-    background: rgba(40, 40, 40, 0.95);
-    border: 1px solid #404040;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
 }
 
 .modal-header {
-    background: linear-gradient(45deg, #007bff, #0056b3);
-    border-bottom: 1px solid #404040;
+    background: linear-gradient(45deg, var(--header-gradient-1), var(--header-gradient-2));
+    border-bottom: 1px solid var(--border-color);
+    color: var(--header-text);
+}
+
+.modal-header .modal-title {
+    color: var(--header-text);
 }
 
 .modal-body {
-    background: rgba(30, 30, 30, 0.5);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
 .modal-footer {
-    border-top: 1px solid #404040;
-    background: rgba(35, 35, 35, 0.8);
+    border-top: 1px solid var(--border-color);
+    background: var(--bg-muted);
 }
 
 .btn-close {
     filter: invert(1);
 }
 
-/* Animacion de entrada para el modal */
 .modal.fade .modal-dialog {
     transition: transform 0.3s ease-out;
 }
@@ -327,15 +471,33 @@ body {
     transform: none;
 }
 
-/* Badge para rutinas opcionales */
 .badge.bg-warning {
     font-size: 0.75rem;
     padding: 0.25em 0.6em;
     font-weight: 600;
 }
 
-/* Animacion para el porcentaje cuando excede 100% */
 #todayProgress.text-warning {
     font-weight: bold;
     text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.modal-body h5,
+.modal-body h6,
+.modal-body p,
+.modal-body label {
+    color: var(--text-primary);
+}
+
+html.light-theme .text-white {
+    color: var(--text-primary) !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+.routine-header h5,
+.routine-section h5 {
+    color: var(--text-primary);
 }
